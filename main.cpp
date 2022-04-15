@@ -105,10 +105,12 @@ void* crypt(void * CryptParamsetrs)
 	}
 
 	status = pthread_barrier_wait(param->barrier); 
+	
 	if(status != PTHREAD_BARRIER_SERIAL_THREAD && status != 0)
 		{
 		std::cout << "Problem with pthread_barrier_wait";
 		exit(ERROR_WAIT_BARRIER);
+		delete param;
 		}
 		return 0;
 }
@@ -171,7 +173,7 @@ int main (int argc, char **argv) {
 		printf ("\n");
 	}
 	
-	int num_thread = sysconf(_SC_NPROCESSORS_ONLN); // Количествео процессоров +1?
+	int num_thread = sysconf(_SC_NPROCESSORS_ONLN); // Количествео процессоров
 	cout<<"Count of available processors: " << num_thread << std::endl;
 	int inputFile = open(progParam.inputFilePath, O_RDONLY); // open to read inputfile
 
@@ -241,6 +243,7 @@ int main (int argc, char **argv) {
 	if(status != 0)// Проверяем успешность инициализации работы барьера
 	{
 		std::cout << "Error with pthread_barrier_init()";
+		freeSpace(outputText,msg,key);
 		exit(ERROR_BARRIER);
 	}
 
@@ -297,6 +300,6 @@ int main (int argc, char **argv) {
 	for(auto & tempCryptParams : cryptPar){
 		delete tempCryptParams;
 	}
-
+	cryptPar.clear();
 	return SUCCESS;
 }
