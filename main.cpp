@@ -83,13 +83,10 @@ void* keyGenerate(void* params){
 	buff[0] = parametrs->seed;
 
 	// ЛКГ генерация чисел
+	// X[n+1] = (aX[n] + C) mod m
 	for(size_t i = 1; i < (sizeKey + 1)/sizeof(int) ; i++){
 		buff[i]= (a * buff[i-1] + c) % m; 
 	}
-	
-	//for (size_t i = 0;i<sizeKey;i++){
-	//	cout << buff[i]<<",";
-	//}
 
 	return reinterpret_cast<char *>(buff);
 };
@@ -110,7 +107,7 @@ void* crypt(void * CryptParamsetrs)
 	status = pthread_barrier_wait(param->barrier); 
 	if(status != PTHREAD_BARRIER_SERIAL_THREAD && status != 0)
 		{
-		std::cout << "problem with pthread_barrier_wait";
+		std::cout << "Problem with pthread_barrier_wait";
 		exit(ERROR_WAIT_BARRIER);
 		}
 		return 0;
@@ -138,27 +135,27 @@ int main (int argc, char **argv) {
 	while ((c = getopt(argc, argv, "i:o:a:c:x:m:")) != -1) { // Разбор флагов
 		switch (c) {
 		case 'i':
-			printf ("option i with value '%s'\n", optarg);
+			printf ("Flag i with value '%s'\n", optarg);
 			progParam.inputFilePath = optarg;
 			break;
 		case 'o':
-			printf ("option o with value '%s'\n", optarg);
+			printf ("Flag o with value '%s'\n", optarg);
 			progParam.outputFilePath = optarg;
 			break;
 		case 'a':
-			printf ("option a with value '%s'\n", optarg);
+			printf ("Flag a with value '%s'\n", optarg);
 			progParam.a = atoi(optarg);
 			break;
 		case 'c':
-			printf ("option c with value '%s'\n", optarg);
+			printf ("Flag c with value '%s'\n", optarg);
 			progParam.c = atoi(optarg);
 			break;
 		case 'm':
-			printf ("option m with value '%s'\n", optarg);
+			printf ("Flag m with value '%s'\n", optarg);
 			progParam.m = atoi(optarg);
 			break;
 		case 'x':
-			printf ("option x with value '%s'\n", optarg);
+			printf ("Flag x with value '%s'\n", optarg);
 			progParam.seed = atoi(optarg);
 			break;
 		case '?':
@@ -185,11 +182,11 @@ int main (int argc, char **argv) {
 	}
 
 	int inputSize = lseek(inputFile, 0, SEEK_END); // Узнаём размер файла в байтах
-	std::cout<<"input size = "<<inputSize<<std::endl; 
+	std::cout<<"Size of input file:  = "<<inputSize<<std::endl; 
 
 	if(inputSize == -1)
 	{
-		std::cout << "Error with calculation size of input file";
+		std::cout << "Error with calculation size of input file!";
 		exit(ERROR_FILE);
 	}
 
@@ -208,7 +205,7 @@ int main (int argc, char **argv) {
 
 	if(inputSize == -1) // Проверка успешности перемещения  в буффер
 	{
-		std::cout << "error with moving text into buffer msg ";
+		std::cout << "Error in moving inputfile to buffer!";
 		freeSpace(outputText,msg,key);
 		exit(ERROR_FILE);
 	}
