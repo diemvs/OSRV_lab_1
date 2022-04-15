@@ -284,10 +284,14 @@ int main (int argc, char **argv) {
 	int output;
 	if ((output=open(progParam.outputFilePath, O_WRONLY))==-1) {
 		printf ("Cannot open file.\n");
+		freeSpace(outputText,msg,key);
 		exit(ERROR_FILE_W_OPEN);
 	}
-	if(write(output, outputText, inputSize) !=inputSize)
+	if(write(output, outputText, inputSize) !=inputSize){
 		printf("Write Error");
+		freeSpace(outputText,msg,key);
+	}
+		
 	close(output);
 
 	// очистка
