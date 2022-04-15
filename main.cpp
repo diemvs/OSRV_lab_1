@@ -28,8 +28,6 @@
 	12.	Барьер уничтожается.
 */
 
-static int _test_count_Thread = 0;
-
 using std::cout;
 
 enum States{
@@ -71,8 +69,8 @@ struct CryptParams
 	size_t topIndex;	// верхний индекс фрагмента
 	pthread_barrier_t* barrier;
 };
-
-void* keyGenerate(void* params){ // подготовка к генерации ЛКГ и генерация ЛКГ
+// подготовка к генерации ЛКГ и генерация ЛКГ
+void* keyGenerate(void* params){ 
 	KeyGenParams *parametrs = reinterpret_cast<KeyGenParams *>(params);
 
 	size_t a = parametrs->a;
@@ -89,18 +87,15 @@ void* keyGenerate(void* params){ // подготовка к генерации �
 		buff[i]= (a * buff[i-1] + c) % m; 
 	}
 	
-	for (size_t i = 0;i<sizeKey;i++){
-		cout << buff[i]<<",";
-	}
-	//cout <<"BUFF END\n\n";
-
+	//for (size_t i = 0;i<sizeKey;i++){
+	//	cout << buff[i]<<",";
+	//}
 
 	return reinterpret_cast<char *>(buff);
 };
 
 void* crypt(void * CryptParamsetrs)
 {
-	cout  << "\n"<< _test_count_Thread++ << "\n";
 	int status = 0;
 
 	CryptParams* param = reinterpret_cast<CryptParams*>(CryptParamsetrs); //Жестко указываем компилятору тип
@@ -109,7 +104,6 @@ void* crypt(void * CryptParamsetrs)
 
 	while(downIndex < topIndex){
 		param->outputText[downIndex] = param->key[downIndex] ^ param->msg[downIndex];
-		cout << param->msg[downIndex];
 		downIndex++;
 	}
 
@@ -181,7 +175,7 @@ int main (int argc, char **argv) {
 	}
 	
 	int num_thread = sysconf(_SC_NPROCESSORS_ONLN); // Количествео процессоров +1?
-	cout<<"Count of available processors: " << num_thread;
+	cout<<"Count of available processors: " << num_thread << std::endl;
 	int inputFile = open(progParam.inputFilePath, O_RDONLY); // open to read inputfile
 
 	if (inputFile == -1) // Проверка на корректность отрытия файла
@@ -199,14 +193,13 @@ int main (int argc, char **argv) {
 		exit(ERROR_FILE);
 	}
 
-	// char* key = new char[inputSize]; // Место для ПСП 
 	char* key = nullptr;
-	char* outputText = new char[inputSize]; //Зашифрованный текст
-	char* msg = new char[inputSize]; // Текст из inputFile
+	char* outputText = new char[inputSize]; 	//Зашифрованный текст
+	char* msg = new char[inputSize]; 			// Текст из inputFile
 
-	if(lseek(inputFile, 0, SEEK_SET) == -1) // Возвращаемся в начало файла, чтобы прочитать его с начала
+	if(lseek(inputFile, 0, SEEK_SET) == -1) 	// Возвращаемся в начало файла, чтобы прочитать его с начала
 	{
-		std::cout << "error with file ";
+		std::cout << "Error with file!";
 		freeSpace(outputText,msg,key);
 		exit(ERROR_FILE);
 	}
@@ -227,19 +220,19 @@ int main (int argc, char **argv) {
 	keyParam.m=progParam.m;
 	keyParam.seed=progParam.seed;
 
-	pthread_t keyGenThread;//создаём отдельный поток для ЛКГ
-	pthread_t cryptThread[num_thread];// создаём массив потоков для шифрования 
+	pthread_t keyGenThread;				//создаём отдельный поток для ЛКГ
+	pthread_t cryptThread[num_thread];	// создаём массив потоков для шифрования 
 	int status = 0;
 
 	if(pthread_create(&keyGenThread, NULL, keyGenerate, &keyParam) != 0) //Создаем и проверяем успешность потока
 	{
-		std::cout << "error with pthread_create()";
+		std::cout << "Error with pthread_create()";
 		freeSpace(outputText,msg,key);
 		exit(ERROR_CREATE_THREAD);
 	}
 	if(pthread_join(keyGenThread, (void**)&key) != 0)// Запускаем поток и отлавливаем результат работы потока keyGenThread
 	{
-		std::cout << "error with pthread_join()";
+		std::cout << "Error with pthread_join()";
 		freeSpace(outputText,msg,key);
 		exit(ERROR_JOIN_THREAD);
 	}
@@ -250,7 +243,7 @@ int main (int argc, char **argv) {
 
 	if(status != 0)// Проверяем успешность инициализации работы барьера
 	{
-		std::cout << "error with pthread_barrier_init()";
+		std::cout << "Error with pthread_barrier_init()";
 		exit(ERROR_BARRIER);
 	}
 
